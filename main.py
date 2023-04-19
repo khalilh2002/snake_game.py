@@ -1,6 +1,11 @@
 from tkinter import * 
 import random
+import screeninfo
+import pygame
+pygame.init()
 
+
+again = True
 """Game Constants"""
 GAME_WIDTH = 500
 GAME_HEIGHT = 500
@@ -10,6 +15,8 @@ SNAKE_COLOR = 'blue'
 FOOD_COLOR = 'yellow'
 BACKGROUND_COLOR = 'black'
 SPEED = 100
+full = False
+
 
 class Snake:
     def __init__(self):
@@ -27,7 +34,6 @@ class Snake:
                                                         fill=SNAKE_COLOR,
                                                         )
                                 )
-        
 
 class Food:
     def __init__(self):
@@ -66,8 +72,13 @@ def next_turn(snake,food):
         food=Food()
         score += 1
         SPEED -= 1
-
         label.config(text='score : {}'.format(score) )
+
+        """sound"""
+        clink = pygame.mixer.Sound("2.mp3")
+        pygame.mixer.Channel(1).play(clink)
+
+
 
     else:
 
@@ -109,7 +120,6 @@ def change_deriction(new):
         if direction != 'up':
             direction = new
 
-
 def check_chok(snake):
 
     x , y = snake.coordinates[0]
@@ -129,17 +139,12 @@ def check_chok(snake):
             return True
 
     return False
-    
-    
-def full_screen():
-    print('full screen')
-    pass
 
 def game_over():
     global score
 
     canvas.delete(ALL)
-    canvas.create_text(int(GAME_WIDTH/2), int(GAME_HEIGHT/2) , 
+    canvas.create_text(int(GAME_WIDTH/2), int(GAME_HEIGHT/2) ,
                        text='game over',
                        font=("arial",30,'bold'),
                        fill='red')
@@ -148,6 +153,41 @@ def game_over():
                        font=("arial",15,'bold'),
                        fill='white')
     score = 0
+    """edit"""
+    game_over_sound = pygame.mixer.Sound("game-over.mp3")
+    pygame.mixer.Channel(0).play(game_over_sound)
+    """end"""
+
+
+def full_screen(*args):
+    global window,full
+
+    m = screeninfo.get_monitors()
+    w, h = m[0].width, m[0].height
+
+    if not full:
+
+        window.geometry(f'{w}x{h}+0+0')
+        full = True
+
+    else:
+
+        window.geometry(f'{GAME_WIDTH}x{GAME_HEIGHT}+{int(w/2-GAME_WIDTH/2)}+{int(h/2-GAME_HEIGHT/2)}')
+        full = False
+
+
+def play_sound():
+    s = pygame.mixer.Sound("main-theme.mp3")
+    pygame.mixer.Channel(0).play(s)
+
+"""
+def retry(*args):
+    global again
+    window.destroy()
+    start()
+
+"""
+
 
 direction = 'down'
 score = 0
@@ -157,20 +197,26 @@ window.title('Snake game')
 window.resizable(False,False)
 label = Label(window, text='score : {}'.format(score) , font=("arial",10,'bold'))
 label.pack()
-canvas = Canvas(window, width=GAME_WIDTH, height=GAME_HEIGHT, bg=BACKGROUND_COLOR)
-canvas.pack()
 
+canvas = Canvas(window, width=GAME_WIDTH, height=GAME_HEIGHT, bg=BACKGROUND_COLOR)
+canvas.pack(fill=BOTH, expand=True)
+
+"""sound"""
+play_sound()
 snake = Snake()
 food = Food()
-window.bind('<Left>',lambda x : change_deriction('left'))
-window.bind('<Up>',lambda x : change_deriction('up'))
-window.bind('<Down>',lambda x : change_deriction('down'))
-window.bind('<Right>',lambda x : change_deriction('right'))
 
-window.bind('<f>',lambda x : full_screen())
+window.bind('<Left>', lambda x: change_deriction('left'))
+window.bind('<Up>', lambda x: change_deriction('up'))
+window.bind('<Down>', lambda x: change_deriction('down'))
+window.bind('<Right>', lambda x: change_deriction('right'))
 
+window.bind('<f>', full_screen)
 
 next_turn(snake,food)
-
+"""edit"""
+#window.bind('<r>', retry)
+"""end"""
 
 window.mainloop()
+
