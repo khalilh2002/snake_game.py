@@ -1,2 +1,2 @@
 # snake_game.py
-snake game 
+snake game using tkinter and pygame
